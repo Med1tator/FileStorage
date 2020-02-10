@@ -7,9 +7,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["FileStorage.WebApi/FileStorage.WebApi.csproj", "FileStorage.WebApi/"]
+COPY ["src/FileStorage.WebApi/FileStorage.WebApi.csproj", "FileStorage.WebApi/"]
 RUN dotnet restore "FileStorage.WebApi/FileStorage.WebApi.csproj"
-COPY . .
+COPY src/FileStorage.WebApi/ FileStorage.WebApi/
 WORKDIR "/src/FileStorage.WebApi"
 RUN dotnet build "FileStorage.WebApi.csproj" -c Release -o /app/build
 
