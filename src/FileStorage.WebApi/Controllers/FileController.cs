@@ -25,23 +25,14 @@ namespace FileStorage.WebApi.Controllers
         /// </summary>
         /// <param name="imageBuffer"></param>
         /// <returns></returns>
-        //public async Task<IActionResult> Upload(byte[] buffer, string fileName)
         [HttpPost]
         [Route("upload")]
-        //[Consumes("application/json", "multipart/form-data")]
         public async Task<IActionResult> UploadAsync([FromForm]IFormCollection data)
         {
             var result = new List<UploadFileResult>();
             var files = data.Files;
             if (files != null && files.Any())
             {
-                //var fileStorageFactory = fileStorageSettings.FileStorageType switch
-                //{
-                //    FileStorageType.QiNiu => new QiNiuStorageFactory(fileStorageSettings.QiNiuSettings),
-                //    FileStorageType.Ali => new AliStorageFactory(fileStorageSettings.AliSetting),
-                //    _ => new QiNiuStorageFactory(fileStorageSettings.QiNiuSettings)
-                //};
-
                 Abstracts.IFileStorageFactory fileStorageFactory;
                 switch (fileStorageSettings.FileStorageType)
                 {
