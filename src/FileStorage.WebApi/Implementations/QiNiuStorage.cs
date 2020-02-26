@@ -22,7 +22,7 @@ namespace FileStorage.WebApi.Implementations
             this.qiNiuSettings = qiNiuSettings;
         }
 
-        public async override Task<UploadFileResult> UploadFileAsync(Stream stream, string fileName = null)
+        public async override Task<UploadFileResult> UploadFileAsync(Stream stream, string fileName = null, string savePath = null)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace FileStorage.WebApi.Implementations
                     var qiNiuUploadFileResult = JsonConvert.DeserializeObject<QiNiuUploadFileResult>(result.Text);
 
                     var fileUrl = $"{qiNiuSettings.FileUrlPrefix.TrimEnd('/')}/{qiNiuUploadFileResult.Key}";
-                    return new UploadFileResult { Status = 1, Message = "File Upload successfully.", FileName = fileName, FileUrl = fileUrl };
+                    return new UploadFileResult { Status = 1, Message = "File upload successfully.", FileName = fileName, FileUrl = fileUrl };
                 }
 
                 return new UploadFileResult { Status = 0, Message = "File upload failed.", FileName = fileName };
@@ -59,25 +59,29 @@ namespace FileStorage.WebApi.Implementations
             }
         }
 
-        public async Task<Qiniu.Http.HttpResult> UploadAsync(Stream stream, string fileName, string token)
+        public async Task<Qiniu.Http.HttpResult> UploadAsync(Stream stream, string fileName, string token, string savePath = null)
         {
             UploadManager um = new UploadManager();
 
-            var today = DateTime.Today;
-            var saveKey = $"{today.Year}/{today.Month}/{today.Day}/{fileName}";
+            var dayPath = DateTime.Today.ToString("yyyy/MM/dd");
+            var saveKey = string.IsNullOrWhiteSpace(savePath)
+                ? $"{dayPath}/{fileName}"
+                : $"{savePath}/{fileName}";
 
             var result = await um.UploadStreamAsync(stream, saveKey, token);
             if (result.Code == (int)Qiniu.Http.HttpCode.FILE_EXISTS)
             {
-                saveKey = $"{today.Year}/{today.Month}/{today.Day}/{StringUtilities.GenerateString(16, containsUpperCase: false, containsSpecialChar: false)}-{fileName}";
+                saveKey = string.IsNullOrWhiteSpace(savePath)
+                    ? $"{dayPath}/{StringUtilities.GenerateString(16, containsUpperCase: false, containsSpecialChar: false)}-{fileName}"
+                    : $"{savePath}/{StringUtilities.GenerateString(16, containsUpperCase: false, containsSpecialChar: false)}-{fileName}";
                 result = await UploadAsync(stream, saveKey, token);
             }
             return result;
         }
 
-        public override UploadFileResult UploadFile(Stream stream, string fileName = null)
+        public override UploadFileResult UploadFile(Stream stream, string fileName = null, string savePath = null)
         {
-            return UploadFileAsync(stream, fileName).Result;
+            return UploadFileAsync(stream, fileName, savePath).Result;
         }
     }
 }
