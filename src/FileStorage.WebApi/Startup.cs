@@ -11,9 +11,11 @@ namespace FileStorage.WebApi
 {
     public class Startup
     {
+        public AppSettings AppSettings { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            AppSettings = Configuration.GetSection("AppSettings").Get<AppSettings>();
         }
 
         public IConfiguration Configuration { get; }
@@ -40,7 +42,7 @@ namespace FileStorage.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UsePathBase("/filestorage");
+            app.UsePathBase($"/{AppSettings.WebPath}");
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -49,7 +51,7 @@ namespace FileStorage.WebApi
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint($"/{AppSettings.WebPath}/swagger/v1/swagger.json", "My API V1");
             });
 
             app.UseHttpsRedirection();
