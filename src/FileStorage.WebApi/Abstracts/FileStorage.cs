@@ -6,8 +6,8 @@ namespace FileStorage.WebApi.Abstracts
 {
     public abstract class FileStorage
     {
-        public abstract UploadFileResult UploadFile(Stream stream, string fileName = null);
+        public abstract UploadFileResult UploadFile(Stream stream, string fileName = null, string savePath = null);
 
-        public abstract Task<UploadFileResult> UploadFileAsync(Stream stream, string fileName = null);
+        public abstract Task<UploadFileResult> UploadFileAsync(Stream stream, string fileName = null, string savePath = null);
     }
 }

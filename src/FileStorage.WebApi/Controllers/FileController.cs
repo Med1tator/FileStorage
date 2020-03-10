@@ -27,11 +27,11 @@ namespace FileStorage.WebApi.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("upload")]
-        public async Task<IActionResult> UploadAsync([FromForm]IFormCollection data)
+        public async Task<IActionResult> UploadAsync([FromForm]IFormCollection files, [FromForm]string savePath = null)
         {
             var result = new List<UploadFileResult>();
-            var files = data.Files;
-            if (files != null && files.Any())
+            var uploadFiles = files.Files;
+            if (uploadFiles != null && uploadFiles.Any())
             {
                 Abstracts.IFileStorageFactory fileStorageFactory;
                 switch (fileStorageSettings.FileStorageType)
@@ -49,10 +49,10 @@ namespace FileStorage.WebApi.Controllers
 
                 var fileStorage = fileStorageFactory.CreateFileStorage();
 
-                foreach (var file in files)
+                foreach (var file in uploadFiles)
                 {
                     using var fileStream = file.OpenReadStream();
-                    var uploadEntry = await fileStorage.UploadFileAsync(fileStream, file.FileName);
+                    var uploadEntry = await fileStorage.UploadFileAsync(fileStream, file.FileName, savePath);
                     result.Add(uploadEntry);
                 }
             }

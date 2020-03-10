@@ -21,18 +21,20 @@ namespace FileStorage.WebApi.Implementations
             this.aliSettings = aliSettings;
         }
 
-        public override UploadFileResult UploadFile(Stream stream, string fileName = null)
+        public override UploadFileResult UploadFile(Stream stream, string fileName = null, string savePath = null)
         {
-            return UploadFileAsync(stream, fileName).Result;
+            return UploadFileAsync(stream, fileName, savePath).Result;
         }
 
-        public async override Task<UploadFileResult> UploadFileAsync(Stream stream, string fileName = null)
+        public async override Task<UploadFileResult> UploadFileAsync(Stream stream, string fileName = null, string savePath = null)
         {
             var client = new OssClient(aliSettings.BucketEndpoint, aliSettings.AK, aliSettings.SK);
             try
             {
-                var today = DateTime.Today;
-                var saveKey = $"{today.Year}/{today.Month}/{today.Day}/{fileName}";
+                var dayPath = DateTime.Today.ToString("yyyy/MM/dd");
+                var saveKey = string.IsNullOrWhiteSpace(savePath)
+                        ? $"{dayPath}/{fileName}"
+                        : $"{savePath}/{fileName}";
 
                 if (client.DoesObjectExist(aliSettings.DefaultBucket, saveKey))
                 {
@@ -40,7 +42,9 @@ namespace FileStorage.WebApi.Implementations
                     var existObjectMd5 = client.GetObjectMetadata(aliSettings.DefaultBucket, saveKey).ContentMd5;
                     if (uploadObjectMd5 != existObjectMd5)
                     {
-                        saveKey = $"{today.Year}/{today.Month}/{today.Day}/{StringUtilities.GenerateString(16, containsUpperCase: false, containsSpecialChar: false)}-{fileName}";
+                        saveKey = string.IsNullOrWhiteSpace(savePath)
+                            ? $"{dayPath}/{StringUtilities.GenerateString(16, containsUpperCase: false, containsSpecialChar: false)}-{fileName}" 
+                            : $"{savePath}/{StringUtilities.GenerateString(16, containsUpperCase: false, containsSpecialChar: false)}-{fileName}";
                     }
                 }
                 var uploadResult = client.PutObject(aliSettings.DefaultBucket, saveKey, stream);
