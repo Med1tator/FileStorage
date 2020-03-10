@@ -51,7 +51,7 @@ namespace FileStorage.WebApi.Implementations
                     return new UploadFileResult { Status = 1, Message = $"File upload successfully.", FileName = fileName, FileUrl = fileUrl };
                 }
 
-                return new UploadFileResult { Status = 0, Message = "File upload failed.", FileName = fileName };
+                return await Task.FromResult(new UploadFileResult { Status = 0, Message = "File upload failed.", FileName = fileName });
             }
             catch (Exception ex)
             {
